@@ -1,15 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using monstock.Components;
+using monstock.Models;
+using System.Reflection.Metadata;
 
 namespace monstock
 {
     public class Program
     {
+        //DbContext
+        public class BloggingContext(DbContextOptions<BloggingContext> options) : DbContext(options)
+        {
+            public DbSet<ColorRecord> Colors { get; set; }
+        }
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            //var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
 
-            // Add services to the container.
-            builder.Services.AddRazorComponents()
+            builder.Services.AddDbContextPool<BloggingContext>(opt =>
+                opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        // Add services to the container.
+        builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
             var app = builder.Build();
